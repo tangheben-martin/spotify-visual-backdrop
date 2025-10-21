@@ -7,6 +7,7 @@
    import { usePlaybackStore } from "@/store/playbackStore";
    import { classifyMood } from "@/lib/audioFeatureUtils";
    import { ErrorBoundary } from "@/components/ErrorBoundary";
+   import { LoadingSpinner } from "@/components/LoadingSpinner";
 
    export default function Dashboard() {
      const { data: session, status } = useSession();
@@ -23,10 +24,10 @@
 
      if (status === "loading" || isLoading) {
        return (
-         <div className="flex min-h-screen items-center justify-center bg-black">
-           <div className="text-xl text-white">Loading...</div>
-         </div>
-       );
+            <div className="flex min-h-screen items-center justify-center bg-black">
+                <LoadingSpinner size="lg" />
+            </div>
+        );
      }
 
      if (!session) {
