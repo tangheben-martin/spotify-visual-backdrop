@@ -6,6 +6,7 @@
    import { useSpotifyPlayback } from "@/hooks/useSpotifyPlayback";
    import { usePlaybackStore } from "@/store/playbackStore";
    import { classifyMood } from "@/lib/audioFeatureUtils";
+   import { ErrorBoundary } from "@/components/ErrorBoundary";
 
    export default function Dashboard() {
      const { data: session, status } = useSession();
@@ -36,6 +37,8 @@
      const mood = classifyMood(audioFeatures);
 
      return (
+
+      <ErrorBoundary>
        <div className="min-h-screen bg-black text-white p-8">
          <div className="max-w-4xl mx-auto">
            <div className="flex justify-between items-center mb-8">
@@ -157,5 +160,6 @@
            )}
          </div>
        </div>
+       </ErrorBoundary>
      );
    }
