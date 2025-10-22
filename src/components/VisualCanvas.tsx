@@ -2,7 +2,6 @@
 
    import { useEffect, useRef } from "react";
    import * as THREE from "three";
-   import VisualCanvas from "@/components/VisualCanvas";
 
    export default function VisualCanvas() {
      const containerRef = useRef<HTMLDivElement>(null);
@@ -31,10 +30,19 @@
 
        // Renderer setup
        const renderer = new THREE.WebGLRenderer({
-         antialias: true,
+         antialias: false, // Disable for low-res effect
          alpha: true,
        });
-       renderer.setSize(window.innerWidth, window.innerHeight);
+       // Set lower resolution for dreamlike effect
+        const renderScale = 0.6; // Adjust between 0.5-0.75 for different effects
+        renderer.setSize(
+            window.innerWidth * renderScale,
+            window.innerHeight * renderScale,
+            false
+        );
+        renderer.domElement.style.width = "100%";
+        renderer.domElement.style.height = "100%";
+        renderer.domElement.style.imageRendering = "pixelated";
        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
        containerRef.current.appendChild(renderer.domElement);
        rendererRef.current = renderer;
@@ -49,12 +57,17 @@
 
        // Handle window resize
        const handleResize = () => {
-         if (!cameraRef.current || !rendererRef.current) return;
+            if (!cameraRef.current || !rendererRef.current) return;
 
-         cameraRef.current.aspect = window.innerWidth / window.innerHeight;
-         cameraRef.current.updateProjectionMatrix();
-         rendererRef.current.setSize(window.innerWidth, window.innerHeight);
-       };
+            const renderScale = 0.6;
+            cameraRef.current.aspect = window.innerWidth / window.innerHeight;
+            cameraRef.current.updateProjectionMatrix();
+            rendererRef.current.setSize(
+            window.innerWidth * renderScale,
+            window.innerHeight * renderScale,
+            false
+            );
+        };
 
        window.addEventListener("resize", handleResize);
 
