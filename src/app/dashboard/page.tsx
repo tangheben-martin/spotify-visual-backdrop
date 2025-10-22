@@ -8,6 +8,7 @@
    import { classifyMood } from "@/lib/audioFeatureUtils";
    import { ErrorBoundary } from "@/components/ErrorBoundary";
    import { LoadingSpinner } from "@/components/LoadingSpinner";
+   import VisualCanvas from "@/components/VisualCanvas";
 
    export default function Dashboard() {
      const { data: session, status } = useSession();
@@ -40,7 +41,9 @@
      return (
 
       <ErrorBoundary>
-       <div className="min-h-screen bg-black text-white p-8">
+         <VisualCanvas />
+         <div className="min-h-screen text-white p-8 relative z-10">
+
          <div className="max-w-4xl mx-auto">
            <div className="flex justify-between items-center mb-8">
              <h1 className="text-4xl font-bold">Dashboard</h1>
@@ -161,6 +164,7 @@
            )}
          </div>
        </div>
+
        </ErrorBoundary>
      );
    }
