@@ -2,6 +2,7 @@
 
    import { useEffect, useRef } from "react";
    import * as THREE from "three";
+   import VisualCanvas from "@/components/VisualCanvas";
 
    export default function VisualCanvas() {
      const containerRef = useRef<HTMLDivElement>(null);
@@ -84,10 +85,15 @@
      }, []);
 
      return (
-       <div
-         ref={containerRef}
-         className="fixed inset-0 -z-10"
-         style={{ width: "100vw", height: "100vh" }}
-       />
+        <>
+         <VisualCanvas />
+         <div className="min-h-screen text-white p-8 relative z-10">
+            <div
+                ref={containerRef}
+                className="fixed inset-0 -z-10"
+                style={{ width: "100vw", height: "100vh" }}
+            />
+         </div>
+       </>
      );
    }
