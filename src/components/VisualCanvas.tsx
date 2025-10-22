@@ -3,6 +3,7 @@
    import { useEffect, useRef } from "react";
    import * as THREE from "three";
    import { ParticleSystem } from "@/lib/particleSystem";
+   import { useAudioVisualMapping } from "@/hooks/useAudioVisualMapping";
 
    export default function VisualCanvas() {
      const containerRef = useRef<HTMLDivElement>(null);
@@ -13,16 +14,17 @@
      const animationFrameRef = useRef<number | null>(null);
      const clockRef = useRef<THREE.Clock>(new THREE.Clock());
 
+     // Get audio-visual parameters
+     const visualParams = useAudioVisualMapping();
+
      useEffect(() => {
        if (!containerRef.current) return;
 
-       // Scene setup
        const scene = new THREE.Scene();
        scene.background = new THREE.Color(0x000000);
        scene.fog = new THREE.Fog(0x000000, 5, 15);
        sceneRef.current = scene;
 
-       // Camera setup
        const camera = new THREE.PerspectiveCamera(
          75,
          window.innerWidth / window.innerHeight,
@@ -32,7 +34,6 @@
        camera.position.z = 8;
        cameraRef.current = camera;
 
-       // Renderer setup
        const renderer = new THREE.WebGLRenderer({
          antialias: false,
          alpha: true,
@@ -52,7 +53,6 @@
        containerRef.current.appendChild(renderer.domElement);
        rendererRef.current = renderer;
 
-       // Create particle system
        const particleSystem = new ParticleSystem({
          count: 5000,
          size: 0.1,
@@ -61,7 +61,6 @@
        scene.add(particleSystem.getMesh());
        particleSystemRef.current = particleSystem;
 
-       // Handle window resize
        const handleResize = () => {
          if (!cameraRef.current || !rendererRef.current) return;
 
@@ -77,7 +76,6 @@
 
        window.addEventListener("resize", handleResize);
 
-       // Animation loop
        const animate = () => {
          animationFrameRef.current = requestAnimationFrame(animate);
 
@@ -87,10 +85,11 @@
            particleSystemRef.current.update(deltaTime);
          }
 
-         // Slowly rotate camera for dynamic view
+         // Dynamic camera movement based on intensity
          if (cameraRef.current) {
-           cameraRef.current.position.x = Math.sin(Date.now() * 0.0001) * 2;
-           cameraRef.current.position.y = Math.cos(Date.now() * 0.0001) * 2;
+           const time = Date.now() * 0.0001 * visualParams.speed;
+           cameraRef.current.position.x = Math.sin(time) * 2 * visualParams.intensity;
+           cameraRef.current.position.y = Math.cos(time) * 2 * visualParams.intensity;
            cameraRef.current.lookAt(0, 0, 0);
          }
 
@@ -101,7 +100,6 @@
 
        animate();
 
-       // Cleanup
        return () => {
          window.removeEventListener("resize", handleResize);
          
@@ -119,6 +117,20 @@
          }
        };
      }, []);
+
+     // Update visuals when audio parameters change
+     useEffect(() => {
+       if (!particleSystemRef.current) return;
+
+       const color = new THREE.Color(
+         visualParams.color.r,
+         visualParams.color.g,
+         visualParams.color.b
+       );
+
+       particleSystemRef.current.setColors(color);
+       particleSystemRef.current.setVelocityMultiplier(visualParams.speed);
+     }, [visualParams]);
 
      return (
        <div
