@@ -4,6 +4,7 @@
    import * as THREE from "three";
    import { ParticleSystem } from "@/lib/particleSystem";
    import { useAudioVisualMapping } from "@/hooks/useAudioVisualMapping";
+   import { SmoothColor, SmoothValue } from "@/lib/smoothTransition";
 
    export default function VisualCanvas() {
      const containerRef = useRef<HTMLDivElement>(null);
@@ -13,6 +14,8 @@
      const particleSystemRef = useRef<ParticleSystem | null>(null);
      const animationFrameRef = useRef<number | null>(null);
      const clockRef = useRef<THREE.Clock>(new THREE.Clock());
+     const smoothColorRef = useRef(new SmoothColor(0.05));
+     const smoothSpeedRef = useRef(new SmoothValue(1.0, 0.05));
 
      // Get audio-visual parameters
      const visualParams = useAudioVisualMapping();
@@ -77,26 +80,43 @@
        window.addEventListener("resize", handleResize);
 
        const animate = () => {
-         animationFrameRef.current = requestAnimationFrame(animate);
+       animationFrameRef.current = requestAnimationFrame(animate);
 
-         const deltaTime = clockRef.current.getDelta();
+       const deltaTime = clockRef.current.getDelta();
 
-         if (particleSystemRef.current) {
-           particleSystemRef.current.update(deltaTime);
-         }
+       // Update smooth values
+       const smoothColor = smoothColorRef.current.update();
+       const smoothSpeed = smoothSpeedRef.current.update();
 
-         // Dynamic camera movement based on intensity
-         if (cameraRef.current) {
-           const time = Date.now() * 0.0001 * visualParams.speed;
-           cameraRef.current.position.x = Math.sin(time) * 2 * visualParams.intensity;
-           cameraRef.current.position.y = Math.cos(time) * 2 * visualParams.intensity;
-           cameraRef.current.lookAt(0, 0, 0);
-         }
+       if (particleSystemRef.current) {
+         particleSystemRef.current.update(deltaTime);
+         
+         // Apply smoothed color
+         const color = new THREE.Color(smoothColor.r, smoothColor.g, smoothColor.b);
+         particleSystemRef.current.setColors(color);
+       }
 
-         if (rendererRef.current && sceneRef.current && cameraRef.current) {
-           rendererRef.current.render(sceneRef.current, cameraRef.current);
-         }
-       };
+       if (cameraRef.current) {
+         const time = Date.now() * 0.0001 * smoothSpeed;
+         cameraRef.current.position.x = Math.sin(time) * 2 * visualParams.intensity;
+         cameraRef.current.position.y = Math.cos(time) * 2 * visualParams.intensity;
+         cameraRef.current.lookAt(0, 0, 0);
+       }
+
+       if (rendererRef.current && sceneRef.current && cameraRef.current) {
+         rendererRef.current.render(sceneRef.current, cameraRef.current);
+       }
+     };
+
+     // Update smooth target values when visualParams change
+     useEffect(() => {
+       smoothColorRef.current.setTarget(
+         visualParams.color.r,
+         visualParams.color.g,
+         visualParams.color.b
+       );
+       smoothSpeedRef.current.setTarget(visualParams.speed);
+     }, [visualParams]);
 
        animate();
 
