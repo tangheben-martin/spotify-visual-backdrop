@@ -38,6 +38,9 @@
      const { track, audioFeatures, isPlaying } = currentPlayback;
      const mood = classifyMood(audioFeatures);
 
+     console.log("Audio Features:", audioFeatures);
+     console.log("Classified Mood:", mood);
+
      return (
 
       <ErrorBoundary>

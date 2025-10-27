@@ -9,7 +9,7 @@ export async function GET() {
   if (!session || !session.accessToken) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
-
+  console.log("Using Access Token:", session.accessToken ? session.accessToken.substring(0, 10) + "..." : "No Token"); // Log safely
   try {
     const currentTrack = await getCurrentlyPlaying(session.accessToken);
 
@@ -33,7 +33,10 @@ export async function GET() {
 
     const item = currentTrack.item as SpotifyApi.TrackObjectFull;
     const trackId = item.id;
+    
+    console.log("Fetching audio features for track:", trackId); // Debug log
     const audioFeatures = await getAudioFeatures(session.accessToken, trackId);
+    console.log("Audio features received:", audioFeatures); // Debug log
 
     return NextResponse.json({
       isPlaying: currentTrack.is_playing,
